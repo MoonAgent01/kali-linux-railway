@@ -5,7 +5,3 @@ dockerfilePath = "Dockerfile"
 [deploy]
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 3
-
-# Kasm desktop serves on port 6901
-[[deploy.healthchecks]]
-port = 6901
