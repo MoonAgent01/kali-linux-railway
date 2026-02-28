@@ -2,23 +2,22 @@ FROM kasmweb/kali-rolling-desktop:1.18.0
 
 USER root
 
-# Fix shared memory — Kasm needs at least 512MB, Railway doesn't support --shm-size
-RUN rm -rf /dev/shm && mkdir -p /dev/shm && chmod 1777 /dev/shm
-RUN echo "tmpfs /dev/shm tmpfs defaults,size=512m 0 0" >> /etc/fstab
+# Railway doesn't support --shm-size, so increase shm inside the image
+RUN umount /dev/shm 2>/dev/null; rm -rf /dev/shm && mkdir -p /dev/shm && chmod 1777 /dev/shm
 
-# Disable SSL — Railway handles SSL termination, KasmVNC must serve plain HTTP
-RUN find / -name "*.yaml" -path "*/kasmvnc/*" -exec sed -i 's/use_ssl: true/use_ssl: false/g' {} \; 2>/dev/null || true
+# Generate self-signed cert for KasmVNC (it expects SSL certs to exist)
+RUN openssl req -x509 -nodes -days 3650 \
+    -newkey rsa:2048 \
+    -keyout /usr/share/kasmvnc/certs/self.pem \
+    -out /usr/share/kasmvnc/certs/self.pem \
+    -subj "/C=US/ST=None/L=None/O=None/CN=localhost" 2>/dev/null || true
 
-# Set VNC password
+# VNC password and settings
 ENV VNC_PW=password
-ENV VNCOPTIONS="-disableBasicAuth"
 
-# Create custom startup that maps Railway's PORT to KasmVNC's port
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+# Tell Kasm to listen on port 6901
+ENV KASM_PORT=6901
 
 USER 1000
 
 EXPOSE 6901
-
-ENTRYPOINT ["/entrypoint.sh"]
