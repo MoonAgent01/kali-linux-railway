@@ -12,8 +12,6 @@ COPY nginx.conf /etc/nginx/nginx.conf
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-USER 1000
-
 ENV VNC_PW=password
 
 EXPOSE 8080
