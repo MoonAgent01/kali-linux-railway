@@ -6,9 +6,9 @@ dockerfilePath = "Dockerfile"
 restartPolicyType = "on_failure"
 restartPolicyMaxRetries = 5
 
-# KasmVNC serves HTTPS on port 6901
+# KasmVNC on port 8080
 [[deploy.healthchecks]]
-port = 6901
+port = 8080
 path = "/"
 initialDelaySeconds = 60
 timeoutSeconds = 15
